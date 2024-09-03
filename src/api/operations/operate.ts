@@ -8,6 +8,17 @@ import {Cookie} from "../resourceFetcher/cookieList";
 import {invoke} from "@tauri-apps/api";
 import notification from "./notification";
 
+export type Done = {
+    status: "Done";
+    data: number;
+}
+
+export type Clearing = {
+    status: "Clearing";
+}
+
+export type ClearStatus = Done | Clearing;
+
 class Operate {
     async openNotificationWindow(cookie: Cookie) {
         console.log(`send Notification`);
@@ -86,6 +97,14 @@ class Operate {
 
     async hideNotifyIcon() {
         await invoke("hide_notification")
+    }
+
+    async getCacheDirSize() {
+        return await invoke<string>("get_cache_dir_size")
+    }
+
+    async clearCacheDir() {
+        return await invoke<ClearStatus>("clear_cache_dir")
     }
 }
 

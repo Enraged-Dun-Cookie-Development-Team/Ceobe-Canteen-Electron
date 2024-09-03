@@ -13,6 +13,7 @@ mod resource_location;
 mod should_silence;
 mod system_notification;
 mod update_available;
+mod cache;
 
 pub use self::auto_launch::{auto_launch_setting, set_auto_launch};
 pub use clipboard::copy_image;
@@ -28,3 +29,4 @@ pub use request_refer_image::request_refer_image;
 pub use resource_location::{get_app_cache_path, get_app_config_path};
 pub use should_silence::should_silence;
 pub use system_notification::send_system_notification;
+pub use cache::{get_cache_dir_size, clear_cache_dir};

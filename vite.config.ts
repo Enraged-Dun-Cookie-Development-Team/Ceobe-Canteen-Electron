@@ -1,20 +1,20 @@
-import { defineConfig } from "vite";
+import { fileURLToPath, URL } from "node:url";
+
 import vue from "@vitejs/plugin-vue";
+import { defineConfig } from "vite";
 // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
 import vuetify from "vite-plugin-vuetify";
-import eslintPlugin from "vite-plugin-eslint";
-import { fileURLToPath, URL } from "node:url";
 // https://vitejs.dev/config/
-export default defineConfig(async () => {
+export default defineConfig(() => {
   return {
     assetsInclude: ["./src/asset/image/**/*"],
     plugins: [
       vue({
-        template:{
-          compilerOptions:{
-            isCustomElement: (tag:string) => tag==="ceobe-webview"
-          }
-        }
+        template: {
+          compilerOptions: {
+            isCustomElement: (tag: string) => tag === "ceobe-webview",
+          },
+        },
       }),
       vuetify({ autoImport: true }),
       // eslintPlugin({

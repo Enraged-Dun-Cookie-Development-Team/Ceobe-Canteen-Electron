@@ -1,42 +1,11 @@
-<template>
-  <div class="browser w-100">
-    <v-toolbar :title="query?.source?.toString()">
-      <template #prepend>
-        <v-img
-          :src="getImage(query?.icon?.toString() ?? '')"
-          class="border-radius-50"
-          width="26"
-        ></v-img>
-      </template>
-      <v-btn
-        icon="fas fa-circle-xmark"
-        size="small"
-        title="关闭"
-        @click="back"
-      ></v-btn>
-    </v-toolbar>
-<!--    <iframe-->
-<!--      :src="query.url"-->
-<!--      :style="{ width: query.width ? query.width : '100%' }"-->
-<!--      :useragent="query.useragent ? query.useragent : null"-->
-<!--      class="webview"-->
-<!--      style="margin: auto"-->
-<!--    ></iframe>-->
-<!--    <iframe-->
-<!--      :src="query.url"-->
-<!--      :style="{ width: query.width ? query.width : '100%' }"-->
-<!--      :useragent="query.useragent ? query.useragent : null"-->
-<!--      style="margin: auto"-->
-<!--    ></iframe>-->
-  </div>
-</template>
-
 <script lang="ts" name="index" setup>
-import { useRoute, useRouter } from "vue-router";
 import { onMounted, onUnmounted, reactive, ref, watch } from "vue";
-import { getImage } from "@/utils/imageUtil";
-import {invoke} from "@tauri-apps/api";
+
+import { invoke } from "@tauri-apps/api";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
+import { useRoute, useRouter } from "vue-router";
+
+import { getImage } from "@/utils/imageUtil";
 
 const router = useRouter();
 const route = useRoute();
@@ -55,7 +24,9 @@ const webviewWindow = reactive<{
 }>({
   webview: null,
   init() {
-    webviewWindow.webview = document.querySelector("iframe") as unknown as WebView;
+    webviewWindow.webview = document.querySelector(
+      "iframe",
+    ) as unknown as WebView;
 
     if (webviewWindow.webview)
       webviewWindow.webview.addEventListener("dom-ready", () => {
@@ -104,7 +75,7 @@ const webviewWindow = reactive<{
 });
 
 function back() {
-  invoke("back_preview")
+  invoke("back_preview");
   router.push({
     path: "/",
   });
@@ -125,13 +96,46 @@ onMounted(() => {
   listen("close-main", () => {
     back();
   }).then((unListen: UnlistenFn) => {
-    unlisten = unListen
+    unlisten = unListen;
   });
 });
 onUnmounted(() => {
   unlisten();
-})
+});
 </script>
+
+<template>
+  <div class="browser w-100">
+    <v-toolbar :title="query?.source?.toString()">
+      <template #prepend>
+        <v-img
+          :src="getImage(query?.icon?.toString() ?? '')"
+          class="border-radius-50"
+          width="26"
+        ></v-img>
+      </template>
+      <v-btn
+        icon="fas fa-circle-xmark"
+        size="small"
+        title="关闭"
+        @click="back"
+      ></v-btn>
+    </v-toolbar>
+    <!--    <iframe-->
+    <!--      :src="query.url"-->
+    <!--      :style="{ width: query.width ? query.width : '100%' }"-->
+    <!--      :useragent="query.useragent ? query.useragent : null"-->
+    <!--      class="webview"-->
+    <!--      style="margin: auto"-->
+    <!--    ></iframe>-->
+    <!--    <iframe-->
+    <!--      :src="query.url"-->
+    <!--      :style="{ width: query.width ? query.width : '100%' }"-->
+    <!--      :useragent="query.useragent ? query.useragent : null"-->
+    <!--      style="margin: auto"-->
+    <!--    ></iframe>-->
+  </div>
+</template>
 
 <style lang="scss" rel="stylesheet/scss">
 .browser {

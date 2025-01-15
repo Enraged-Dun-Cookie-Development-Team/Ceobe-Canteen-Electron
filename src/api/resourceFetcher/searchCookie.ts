@@ -1,4 +1,5 @@
 import requestClient, { Payload, Response } from "@/utils/requestUtil";
+
 import { Cookie } from "./cookieList";
 
 export interface CookiePagination {
@@ -73,9 +74,9 @@ export function getCookieSearchList({
   datasource_comb_id: string;
   search_word: string;
 }): Promise<Response<Payload<CookiePagination>>> {
-  let params: Record<string, any> = {
-    datasource_comb_id: datasource_comb_id,
-    search_word: search_word,
+  const params: Record<string, any> = {
+    datasource_comb_id,
+    search_word,
   };
 
   if (cookie_id) {

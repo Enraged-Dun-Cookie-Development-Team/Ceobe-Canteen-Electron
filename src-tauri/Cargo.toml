@@ -1,6 +1,6 @@
 [package]
 name = "ceobe-canteen-desktop"
-version = "1.0.4"
+version = "1.0.0"
 description = "小刻食堂的桌面端，恭喜你电脑有多了个和小刻一样喜欢吃东西的浏览器内核 "
 authors = ["FrozenString<frozenstringstable@gmail.com>"]
 license="AGPL-3"
@@ -37,7 +37,7 @@ http-cache-semantics = "1"
 http-cache = { version = "0.14", default-features = false }
 futures = "0.3"
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["time",
+tracing-subscriber = { version = "0.3.19", features = ["time",
     "smallvec",
     "parking_lot",
 ] }
@@ -45,6 +45,7 @@ task-local-extensions = "0.1"
 chrono = "0.4"
 reqwest-retry = "0.2"
 serde_repr = "0.1.16"
+
 [target.'cfg(windows)'.dependencies.windows]
 version = "0.39"
 features = [

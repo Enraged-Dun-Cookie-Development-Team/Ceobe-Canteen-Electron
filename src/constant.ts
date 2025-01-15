@@ -1,8 +1,8 @@
 interface ToolInfo {
-  url: string,
-  name: string,
-  img: string,
-  radius: boolean
+  url: string;
+  name: string;
+  img: string;
+  radius: boolean;
 }
 
 const toolInfo = [
@@ -63,10 +63,10 @@ const toolInfo = [
 ];
 
 interface SourceInfo {
-  url: string,
-  name: string,
-  img: string,
-  radius?: boolean
+  url: string;
+  name: string;
+  img: string;
+  radius?: boolean;
 }
 
 const sourceInfo: SourceInfo[] = [

@@ -1,3 +1,7 @@
+<script setup name="home" lang="ts">
+import TimeLine from "./TimeLine.vue";
+</script>
+
 <template>
   <div class="home d-flex">
     <time-line class="pt-2"></time-line>
@@ -8,10 +12,6 @@
     </keep-alive>
   </div>
 </template>
-
-<script setup name="home" lang="ts">
-import TimeLine from "./TimeLine.vue";
-</script>
 
 <style rel="stylesheet/scss" lang="scss">
 .home {

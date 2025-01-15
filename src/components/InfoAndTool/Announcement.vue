@@ -1,3 +1,32 @@
+<script setup name="announcement" lang="ts">
+import { onMounted, ref } from "vue";
+
+import { DateTime } from "luxon";
+
+import ceobeRequest from "@/api/operations/ceobeRequest";
+import type { Announcement } from "@/api/resourceFetcher/announcement";
+
+const announcementData = ref<Announcement[]>([]);
+const announcementIndex = ref(0);
+const getAnnouncementData = () => {
+  ceobeRequest.getAnnouncementInfo().then((res) => {
+    if (res.status === 200) {
+      announcementData.value = res.data.data.filter(
+        (x) =>
+          DateTime.fromSQL(x.start_time, { zone: "Asia/Shanghai" }) <=
+            DateTime.local() &&
+          DateTime.fromSQL(x.over_time, { zone: "Asia/Shanghai" }) >=
+            DateTime.local(),
+      );
+    }
+  });
+};
+
+onMounted(() => {
+  getAnnouncementData();
+});
+</script>
+
 <template>
   <div class="announcement mt-2">
     <v-card>
@@ -18,31 +47,6 @@
     </v-card>
   </div>
 </template>
-
-<script setup name="announcement" lang="ts">
-import { onMounted, ref } from "vue";
-import ceobeRequest from "@/api/operations/ceobeRequest";
-import type { Announcement } from "@/api/resourceFetcher/announcement";
-import {DateTime} from "luxon";
-
-const announcementData = ref<Announcement[]>([]);
-const announcementIndex = ref(0);
-const getAnnouncementData = () => {
-  ceobeRequest.getAnnouncementInfo().then((res) => {
-    if (res.status == 200) {
-      announcementData.value = res.data.data.filter(
-        (x) =>
-          DateTime.fromSQL(x.start_time, {zone: "Asia/Shanghai"}) <= DateTime.local() &&
-          DateTime.fromSQL(x.over_time, {zone: "Asia/Shanghai"}) >= DateTime.local(),
-      );
-    }
-  });
-};
-
-onMounted(() => {
-  getAnnouncementData();
-});
-</script>
 
 <style rel="stylesheet/scss" lang="scss">
 .announcement {

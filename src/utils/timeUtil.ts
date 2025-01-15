@@ -1,4 +1,4 @@
-import { DateTime } from "luxon"
+import { DateTime } from "luxon";
 function transformDate(dateValue: number | string | Date): Date {
   if (typeof dateValue !== "object" || dateValue.constructor !== Date) {
     dateValue = new Date(dateValue);
@@ -27,16 +27,16 @@ export function format(date: number | string | Date, formatText: string) {
   if (/(y+)/.test(formatText)) {
     formatText = formatText.replace(
       RegExp.$1,
-      (dateConv.getFullYear() + "").substr(4 - RegExp.$1.length),
+      `${dateConv.getFullYear()}`.slice(4 - RegExp.$1.length),
     );
   }
   for (const k in o) {
-    if (new RegExp("(" + k + ")").test(formatText)) {
+    if (new RegExp(`(${k})`).test(formatText)) {
       formatText = formatText.replace(
         RegExp.$1,
         RegExp.$1.length === 1
           ? o[k].toString()
-          : ("00" + o[k]).substr(("" + o[k]).length),
+          : `00${o[k]}`.slice(`${o[k]}`.length),
       );
     }
   }
@@ -47,10 +47,9 @@ export function format(date: number | string | Date, formatText: string) {
  * 计算并格式化两个Date的差值，如果startDate >= endDate会返回空值
  */
 export function calcDiff(
-  endTimestamp:  number,
+  endTimestamp: number,
   startTimestamp = DateTime.local().valueOf(),
 ) {
-
   if (startTimestamp >= endTimestamp) {
     return "";
   }
@@ -76,31 +75,39 @@ export function calcDiff(
  * 将时间转换为中国时区 GMT+8
  */
 export function changeToCCT(date: Date) {
-  let localTime = date.getTime();
-  let localOffset = date.getTimezoneOffset() * 60000;
-  let utc = localTime + localOffset;
-  let cct = utc + 3600000 * 8;
+  const localTime = date.getTime();
+  const localOffset = date.getTimezoneOffset() * 60_000;
+  const utc = localTime + localOffset;
+  const cct = utc + 3_600_000 * 8;
   return new Date(cct);
 }
 
 export function numberToWeek(x: number) {
   switch (x) {
-    case 0:
+    case 0: {
       return "星期天";
-    case 1:
+    }
+    case 1: {
       return "星期一";
-    case 2:
+    }
+    case 2: {
       return "星期二";
-    case 3:
+    }
+    case 3: {
       return "星期三";
-    case 4:
+    }
+    case 4: {
       return "星期四";
-    case 5:
+    }
+    case 5: {
       return "星期五";
-    case 6:
+    }
+    case 6: {
       return "星期六";
-    default:
+    }
+    default: {
       return "无效";
+    }
   }
 }
 
@@ -111,15 +118,15 @@ export function numberToWeek(x: number) {
  * @param s
  */
 export function dateAddTime(h: string, m: string, s: string) {
-  let date = new Date();
-  date.setHours(date.getHours() + parseInt(h));
-  date.setMinutes(date.getMinutes() + parseInt(m));
-  date.setSeconds(date.getSeconds() + parseInt(s));
+  const date = new Date();
+  date.setHours(date.getHours() + Number.parseInt(h));
+  date.setMinutes(date.getMinutes() + Number.parseInt(m));
+  date.setSeconds(date.getSeconds() + Number.parseInt(s));
   return new Date(date);
 }
 
 export function secondToDate(result: number) {
-  let m = Math.floor((result / 60) % 60);
-  let s = Math.floor(result % 60);
-  return m + ":" + s;
+  const m = Math.floor((result / 60) % 60);
+  const s = Math.floor(result % 60);
+  return `${m}:${s}`;
 }

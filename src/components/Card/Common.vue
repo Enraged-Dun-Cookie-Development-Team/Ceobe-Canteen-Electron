@@ -1,3 +1,60 @@
+<script setup lang="ts">
+import { onMounted, ref } from "vue";
+
+import ceobeRequest from "@/api/operations/ceobeRequest";
+import { Cookie } from "@/api/resourceFetcher/cookieList";
+
+const props = defineProps<{
+  info: Cookie;
+}>();
+const emits = defineEmits({
+  openUrl: null,
+});
+
+const imgUrl = ref<string>("");
+const getImg = (index: number = 0) => {
+  if (!props.info.default_cookie.images) {
+    return;
+  } else if (props.info.datasource.includes("微博")) {
+    ceobeRequest
+      .getHasRefererImageBase64(
+        props.info.default_cookie.images[index].origin_url,
+      )
+      .then((res) => {
+        imgUrl.value = `data:image/jpeg;base64,${res}`;
+      });
+  } else {
+    const url = new URL(props.info.default_cookie.images[index].origin_url);
+    ceobeRequest
+      .getHasRefererImageBase64(
+        props.info.default_cookie.images[index].origin_url,
+        url.origin,
+      )
+      .then((res) => {
+        imgUrl.value = `data:image/jpeg;base64,${res}`;
+      });
+  }
+  return imgUrl.value;
+};
+
+const openUrl = () => {
+  // 统一格式 只需要标题和url和icon
+  const data = {
+    url: props.info.item.url,
+    source: props.info.datasource,
+    icon: props.info.icon,
+  };
+  console.log(data);
+  emits("openUrl", data);
+};
+
+onMounted(() => {
+  if (props.info.default_cookie.images) {
+    getImg();
+  }
+});
+</script>
+
 <template>
   <div class="common-window">
     <v-card class="mx-auto cursor-pointer" width="400" @click="openUrl">
@@ -24,60 +81,6 @@
     </v-card>
   </div>
 </template>
-
-<script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { Cookie } from "@/api/resourceFetcher/cookieList";
-import ceobeRequest from "@/api/operations/ceobeRequest";
-
-const props = defineProps<{
-  info: Cookie;
-}>();
-const emits = defineEmits({
-  openUrl: null,
-});
-
-const imgUrl = ref<string>("");
-const getImg = (index: number = 0) => {
-  if (!props.info.default_cookie.images) {
-    return;
-  } else if (props.info.datasource.includes("微博")) {
-    ceobeRequest
-      .getHasRefererImageBase64(props.info.default_cookie.images[index].origin_url)
-      .then((res) => {
-        imgUrl.value = `data:image/jpeg;base64,${res}`;
-      });
-  } else {
-    let url = new URL(props.info.default_cookie.images[index].origin_url);
-    ceobeRequest
-      .getHasRefererImageBase64(
-        props.info.default_cookie.images[index].origin_url,
-        url.origin
-      )
-      .then((res) => {
-        imgUrl.value = `data:image/jpeg;base64,${res}`;
-      });
-  }
-  return imgUrl.value;
-};
-
-const openUrl = () => {
-  // 统一格式 只需要标题和url和icon
-  let data = {
-    url: props.info.item.url,
-    source: props.info.datasource,
-    icon: props.info.icon,
-  };
-  console.log(data);
-  emits("openUrl", data);
-};
-
-onMounted(() => {
-  if (props.info.default_cookie.images) {
-    getImg();
-  }
-});
-</script>
 
 <style rel="stylesheet/scss" lang="scss">
 .common-window {

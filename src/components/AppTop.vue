@@ -1,154 +1,29 @@
-<template>
-  <div
-      class="app-top d-flex justify-space-between align-center w-100 pa-2"
-      data-tauri-drag-region
-  >
-    <div class="h-100 d-flex align-center">
-      <v-img src="icon.png" width="40"></v-img>
-      <span class="title ml-2 mt-1">小刻食堂</span>
-    </div>
-
-    <div class="h-100 no-drag">
-      <v-menu
-          v-model="search.show"
-          :close-on-content-click="false"
-          location="bottom"
-          transition="slide-y-transition"
-      >
-        <template #activator="{ props }">
-          <v-btn
-              icon="fas fa-magnifying-glass"
-              v-bind="props"
-              variant="text"
-          ></v-btn>
-        </template>
-        <v-card class="mx-auto" color="grey-lighten-3" min-width="400">
-          <v-text-field
-              v-model="search.searchWord"
-              append-inner-icon="fa fa-magnifying-glass"
-              autofocus
-              class="pa-2"
-              clearable
-              color="grey-lighten-1"
-              density="compact"
-              hide-details
-              label="查找饼仓"
-              variant="outlined"
-              @click:append-inner="search.searching"
-              @update:model-value="search.searchChange"
-          ></v-text-field>
-        </v-card>
-      </v-menu>
-      <span v-if="search.wordShow !== ''">{{ search.wordShow }}</span>
-      <v-menu
-          v-model="menuShow.show"
-          :close-on-content-click="false"
-          location="right"
-          transition="slide-y-transition"
-      >
-        <template #activator="{ props }">
-          <v-btn
-              icon="fa fa-filter"
-              v-bind="props"
-              variant="text"
-              @click="menuShow.changeDatasourceOpen(menuShow.show)"
-          ></v-btn>
-        </template>
-        <v-list density="compact">
-          <v-list-item
-              v-for="(item, i) in menuShow.datasourceList"
-              :key="i"
-              :class="
-              item.check ? '' : 'not'
-            "
-              :prepend-avatar="item.avatar"
-              :title="item.nickname"
-              :value="item"
-              class="menuShow-item"
-              color="primary"
-              @click="menuShow.changeSelectSource(item)"
-          >
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </div>
-    <!-- right control panel -->
-    <div class="h-100 no-drag">
-      <v-btn
-          icon="fas fa-comments-dollar"
-          variant="text"
-          @click="donate.show = true"
-      ></v-btn>
-      <v-btn
-          icon="fas fa-gear"
-          variant="text"
-          @click="setting.show = true"
-      ></v-btn>
-      <v-btn
-          icon="fas fa-minus"
-          variant="text"
-          @click="handleWindow.minus"
-      ></v-btn>
-      <v-btn
-          :icon="winMax ? 'fas fa-minimize' : 'fas fa-maximize'"
-          variant="text"
-          @click="handleWindow.maximize"
-      ></v-btn>
-      <v-btn
-          color="error"
-          icon="fas fa-circle-xmark "
-          variant="text"
-          @click="handleWindow.close"
-      ></v-btn>
-    </div>
-  </div>
-
-  <v-dialog
-      v-model="donate.show"
-      persistent
-      transition="dialog-top-transition"
-      width="800"
-  >
-    <donate-page @close="donate.show = false"></donate-page>
-  </v-dialog>
-
-  <v-dialog
-      v-model="setting.show"
-      persistent
-      transition="dialog-top-transition"
-      width="400"
-  >
-    <setting-page :versionState="setting.versionState" @checkUpdate="version.getNewestVersion"
-                  @close="setting.close"></setting-page>
-  </v-dialog>
-  <v-dialog
-      v-model="version.show"
-      persistent
-      transition="dialog-top-transition"
-      width="600"
-  >
-    <version-page :force="version.force" :versionInfo="version.version_info"
-                  @close="version.show = false"></version-page>
-  </v-dialog>
-</template>
-
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from "vue";
-import storage from "../api/operations/localStorage";
+import { onMounted, reactive, ref } from "vue";
+
+import {
+  isPermissionGranted,
+  requestPermission,
+  sendNotification,
+} from "@tauri-apps/api/notification";
+
+import updateManager from "@/api/managers/UpdateManager";
+import { getDatasourceComb } from "@/api/resourceFetcher/datasourceCombine";
 import {
   DatasourceItem,
   getConfigDatasourceList,
 } from "@/api/resourceFetcher/datasourceList";
-import {getDatasourceComb} from "@/api/resourceFetcher/datasourceCombine";
+
 import datasourceConfigOperate from "../api/operations/datasourceConfig";
-import searchWordEvent from "../api/operations/searchWordEvent";
+import storage from "../api/operations/localStorage";
 import operate from "../api/operations/operate";
+import searchWordEvent from "../api/operations/searchWordEvent";
+import updater, { VersionStateType } from "../api/operations/updater";
+
 import DonatePage from "./DonatePage.vue";
 import SettingPage from "./SettingPage.vue";
 import VersionPage from "./VersionPage.vue";
-import {getVersion, DesktopVersion} from "@/api/resourceFetcher/version";
-import updater, {VersionStateType} from "../api/operations/updater";
-import {isPermissionGranted, requestPermission, sendNotification} from "@tauri-apps/api/notification";
+import { ReleasePlatform, ReleaseVersion } from "@/api/resourceFetcher/version";
 
 const winMax = ref(false);
 
@@ -156,6 +31,7 @@ interface ViewDatasourceItem extends DatasourceItem {
   check: boolean;
 }
 
+// APP顶端菜单
 const menuShow = reactive<{
   notOpened: boolean;
   show: boolean;
@@ -174,34 +50,33 @@ const menuShow = reactive<{
       if (menuShow.notOpened) {
         menuShow.notOpened = false;
       }
-      let datasourceConfig = await storage.getItem<string[]>(
-          "datasource-config",
-      );
+      const datasourceConfig =
+        await storage.getItem<string[]>("datasource-config");
       // 打开列表
       getConfigDatasourceList().then((data) => {
-        if (data.status == 200) {
+        if (data.status === 200) {
           menuShow.datasourceList = data.data.data.map(
-              (data: DatasourceItem) => {
-                return {
-                  ...data,
-                  check: false,
-                }
-              },
+            (data: DatasourceItem) => {
+              return {
+                ...data,
+                check: false,
+              };
+            },
           );
           if (datasourceConfig) {
-            let datasourceConfigUuidMap: Record<string, boolean> = {};
-            for (let datasource of datasourceConfig) {
+            const datasourceConfigUuidMap: Record<string, boolean> = {};
+            for (const datasource of datasourceConfig) {
               datasourceConfigUuidMap[datasource] = true;
             }
-            menuShow.datasourceList.forEach((element) => {
+            for (const element of menuShow.datasourceList) {
               if (datasourceConfigUuidMap[element.unique_id]) {
                 element.check = true;
               }
-            });
+            }
           } else {
-            menuShow.datasourceList.forEach((element) => {
+            for (const element of menuShow.datasourceList) {
               element.check = true;
-            });
+            }
           }
         }
       });
@@ -210,18 +85,18 @@ const menuShow = reactive<{
         return;
       }
       // 关闭列表
-      let datasourceConfig = menuShow.datasourceList
-          .filter((element) => {
-            return element.check;
-          })
-          .map((element) => {
-            return element.unique_id;
-          });
-      let comb_resp = await getDatasourceComb(datasourceConfig);
-      let comb_id = comb_resp.data.data.datasource_comb_id;
-      let datasourceComb = await storage.getItem<string>("datasource-comb");
+      const datasourceConfig = menuShow.datasourceList
+        .filter((element) => {
+          return element.check;
+        })
+        .map((element) => {
+          return element.unique_id;
+        });
+      const comb_resp = await getDatasourceComb(datasourceConfig);
+      const comb_id = comb_resp.data.data.datasource_comb_id;
+      const datasourceComb = await storage.getItem<string>("datasource-comb");
       // 如果组合id和之前一样，不进行刷新
-      if (datasourceComb == comb_id) {
+      if (datasourceComb === comb_id) {
         return;
       }
       await storage.setItem("datasource-config", datasourceConfig);
@@ -230,6 +105,7 @@ const menuShow = reactive<{
     }
   },
 });
+// 搜索功能
 const search = reactive({
   show: false,
   wordShow: "",
@@ -250,6 +126,7 @@ const search = reactive({
   },
 });
 
+// 窗口事件控制
 const handleWindow = reactive({
   // 最小化
   minus() {
@@ -266,10 +143,12 @@ const handleWindow = reactive({
   },
 });
 
+// 捐赠窗口控制
 const donate = reactive({
   show: false,
 });
 
+// 设置界面窗口控制
 const setting = reactive({
   show: false,
   // updater setting
@@ -280,26 +159,21 @@ const setting = reactive({
   },
 });
 
-const ErrVersionInfo: DesktopVersion = {
-  baidu: "<Missing>",
-  baidu_text: "<Missing>",
-  description: "<Missing>",
-  dmg: "<Missing>",
-  exe: "<Missing>",
-  force: false,
-  last_force_version: "<Missing>",
-  spare_dmg: "<Missing>",
-  spare_exe: "<Missing>",
-  version: "<Missing>",
+const ErrVersionInfo: ReleaseVersion = {
+  deleted: false,
+  download_source: [],
+  platform: ReleasePlatform.Desktop,
+  previous_mandatory_version: "",
+  version: "0.0.0",
 };
 
 const version = reactive<{
-  show: boolean,
-  version_info: DesktopVersion,
-  force: boolean,
-  getNewestVersion(): void
+  show: boolean;
+  version_info: ReleaseVersion;
+  force: boolean;
+  getNewestVersion(): void;
 }>({
-  show: false,
+  show: true,
   force: false,
   version_info: ErrVersionInfo,
   async getNewestVersion() {
@@ -307,32 +181,171 @@ const version = reactive<{
       if (setting.show) {
         setting.versionState = VersionStateType.Newest;
       }
-      const currentVersion = await getVersion()
-      version.version_info = currentVersion.data.data
+      const currentVersion = await updateManager.latestVersion();
+      if (currentVersion) version.version_info = currentVersion;
       // version.force = await updater.judgmentVersion(version.version_info.last_force_version)
-      version.show = await updater.judgmentVersion(version.version_info.version)
+      version.show = await updater.judgmentVersion(
+        version.version_info.version,
+      );
       if (version.show) {
-        setting.versionState = VersionStateType.UpdateAvailable
+        setting.versionState = VersionStateType.UpdateAvailable;
       }
     } catch (error: any) {
-      console.log("Failure loading New Version")
-      if (!await isPermissionGranted()) {
-        await requestPermission()
+      console.log("Failure loading New Version");
+      if (!(await isPermissionGranted())) {
+        await requestPermission();
       }
       sendNotification({
         title: "小刻出错了！",
         icon: "/asserts/icon.png",
-        body: error.toString()
-      })
+        body: error.toString(),
+      });
     }
-  }
+  },
 });
 
 onMounted(() => {
   version.getNewestVersion();
-})
-
+});
 </script>
+
+<template>
+  <div
+    class="app-top d-flex justify-space-between align-center w-100 pa-2"
+    data-tauri-drag-region
+  >
+    <div class="h-100 d-flex align-center">
+      <v-img src="icon.png" width="40"></v-img>
+      <span class="title ml-2 mt-1">小刻食堂</span>
+    </div>
+
+    <div class="h-100 no-drag">
+      <v-menu
+        v-model="search.show"
+        :close-on-content-click="false"
+        location="bottom"
+        transition="slide-y-transition"
+      >
+        <template #activator="{ props }">
+          <v-btn
+            icon="fas fa-magnifying-glass"
+            v-bind="props"
+            variant="text"
+          ></v-btn>
+        </template>
+        <v-card class="mx-auto" color="grey-lighten-3" min-width="400">
+          <v-text-field
+            v-model="search.searchWord"
+            append-inner-icon="fa fa-magnifying-glass"
+            autofocus
+            class="pa-2"
+            clearable
+            color="grey-lighten-1"
+            density="compact"
+            hide-details
+            label="查找饼仓"
+            variant="outlined"
+            @click:append-inner="search.searching"
+            @update:model-value="search.searchChange"
+          ></v-text-field>
+        </v-card>
+      </v-menu>
+      <span v-if="search.wordShow !== ''">{{ search.wordShow }}</span>
+      <v-menu
+        v-model="menuShow.show"
+        :close-on-content-click="false"
+        location="right"
+        transition="slide-y-transition"
+      >
+        <template #activator="{ props }">
+          <v-btn
+            icon="fa fa-filter"
+            v-bind="props"
+            variant="text"
+            @click="menuShow.changeDatasourceOpen(menuShow.show)"
+          ></v-btn>
+        </template>
+        <v-list density="compact">
+          <v-list-item
+            v-for="(item, i) in menuShow.datasourceList"
+            :key="i"
+            :class="item.check ? '' : 'not'"
+            :prepend-avatar="item.avatar"
+            :title="item.nickname"
+            :value="item"
+            class="menuShow-item"
+            color="primary"
+            @click="menuShow.changeSelectSource(item)"
+          >
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </div>
+    <!-- right control panel -->
+    <div class="h-100 no-drag">
+      <v-btn
+        icon="fas fa-comments-dollar"
+        variant="text"
+        @click="donate.show = true"
+      ></v-btn>
+      <v-btn
+        icon="fas fa-gear"
+        variant="text"
+        @click="setting.show = true"
+      ></v-btn>
+      <v-btn
+        icon="fas fa-minus"
+        variant="text"
+        @click="handleWindow.minus"
+      ></v-btn>
+      <v-btn
+        :icon="winMax ? 'fas fa-minimize' : 'fas fa-maximize'"
+        variant="text"
+        @click="handleWindow.maximize"
+      ></v-btn>
+      <v-btn
+        color="error"
+        icon="fas fa-circle-xmark "
+        variant="text"
+        @click="handleWindow.close"
+      ></v-btn>
+    </div>
+  </div>
+
+  <v-dialog
+    v-model="donate.show"
+    persistent
+    transition="dialog-top-transition"
+    width="800"
+  >
+    <donate-page @close="donate.show = false"></donate-page>
+  </v-dialog>
+
+  <v-dialog
+    v-model="setting.show"
+    persistent
+    transition="dialog-top-transition"
+    width="400"
+  >
+    <setting-page
+      :version-state="setting.versionState"
+      @check-update="version.getNewestVersion"
+      @close="setting.close"
+    ></setting-page>
+  </v-dialog>
+  <v-dialog
+    v-model="version.show"
+    persistent
+    transition="dialog-top-transition"
+    width="600"
+  >
+    <version-page
+      :force="version.force"
+      :version-info="version.version_info"
+      @close="version.show = false"
+    ></version-page>
+  </v-dialog>
+</template>
 
 <style lang="scss" rel="stylesheet/scss">
 .app-top {

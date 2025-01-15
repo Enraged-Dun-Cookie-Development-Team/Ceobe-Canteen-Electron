@@ -1,3 +1,5 @@
+<script setup name="AppMain" lang="ts"></script>
+
 <template>
   <div class="app-main d-flex">
     <keep-alive>
@@ -7,5 +9,3 @@
     </keep-alive>
   </div>
 </template>
-
-<script setup name="AppMain" lang="ts"></script>

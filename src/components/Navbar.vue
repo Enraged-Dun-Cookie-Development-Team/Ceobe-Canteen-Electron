@@ -1,24 +1,15 @@
-<template>
-  <div class="index">
-
-    <div>
-      <app-top></app-top>
-      <app-main></app-main>
-    </div>
-  </div>
-
-</template>
-
 <script lang="ts" setup>
-import {onMounted, ref} from "vue";
-import AppTop from "./AppTop.vue";
-import AppMain from "@/view/AppMain.vue";
+import { onMounted, ref } from "vue";
+
 import storage from "@/api/operations/localStorage";
+import AppMain from "@/view/AppMain.vue";
+
+import AppTop from "./AppTop.vue";
 
 const loadApp = ref(false);
 
 onMounted(async () => {
-  let result = await storage.getItem<boolean>("agreeApp");
+  const result = await storage.getItem<boolean>("agreeApp");
   if (result) {
     loadApp.value = true;
     return;
@@ -26,6 +17,15 @@ onMounted(async () => {
   loadApp.value = false;
 });
 </script>
+
+<template>
+  <div class="index">
+    <div>
+      <app-top></app-top>
+      <app-main></app-main>
+    </div>
+  </div>
+</template>
 
 <style lang="scss">
 .read-me {

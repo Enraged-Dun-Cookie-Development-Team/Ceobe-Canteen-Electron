@@ -1,3 +1,51 @@
+<script setup name="donate" lang="ts">
+import { ref } from "vue";
+
+import operate from "@/api/operations/operate";
+import { getImage } from "@/utils/imageUtil";
+const emits = defineEmits({
+  close: null,
+});
+const donate = ref<{
+  show: boolean;
+  list: { img: string; text: string; link?: string }[];
+  openUrl(url: string): void;
+  close(): void;
+}>({
+  show: false,
+  list: [
+    {
+      img: "/assets/image/donate/qq.png",
+      text: "加群聊天",
+      link: "https://jq.qq.com/?_wv=1027&k=EOxqu7FL",
+    },
+    {
+      img: "/assets/image/donate/bilibili.png",
+      text: "B站关注/充电",
+      link: "https://space.bilibili.com/1723599428",
+    },
+    {
+      img: "/assets/image/donate/wechat.png",
+      text: "微信捐助",
+    },
+    {
+      img: "/assets/image/donate/zfb.jpg",
+      text: "支付宝捐助",
+    },
+  ],
+  // 查看收支一览表
+  openUrl(url: string) {
+    if (!url) {
+      return;
+    }
+    operate.openUrlInBrowser(url);
+  },
+  close() {
+    emits("close");
+  },
+});
+</script>
+
 <template>
   <div class="donate">
     <v-card>
@@ -59,52 +107,5 @@
     </v-card>
   </div>
 </template>
-
-<script setup name="donate" lang="ts">
-import { ref } from "vue";
-import operate from "@/api/operations/operate";
-import { getImage } from "@/utils/imageUtil";
-const emits = defineEmits({
-  close: null,
-});
-const donate = ref<{
-  show: boolean;
-  list: { img: string; text: string; link?: string }[];
-  openUrl(url: string): void;
-  close(): void;
-}>({
-  show: false,
-  list: [
-    {
-      img: "/assets/image/donate/qq.png",
-      text: "加群聊天",
-      link: "https://jq.qq.com/?_wv=1027&k=EOxqu7FL",
-    },
-    {
-      img: "/assets/image/donate/bilibili.png",
-      text: "B站关注/充电",
-      link: "https://space.bilibili.com/1723599428",
-    },
-    {
-      img: "/assets/image/donate/wechat.png",
-      text: "微信捐助",
-    },
-    {
-      img: "/assets/image/donate/zfb.jpg",
-      text: "支付宝捐助",
-    },
-  ],
-  // 查看收支一览表
-  openUrl(url: string) {
-    if (!url) {
-      return;
-    }
-    operate.openUrlInBrowser(url);
-  },
-  close() {
-    emits("close");
-  },
-});
-</script>
 
 <style rel="stylesheet/scss" lang="scss"></style>

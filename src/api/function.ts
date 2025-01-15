@@ -1,7 +1,7 @@
+import { invoke } from "@tauri-apps/api";
+import { writeText } from "@tauri-apps/api/clipboard";
 import { readTextFile } from "@tauri-apps/api/fs";
 import { open } from "@tauri-apps/api/shell";
-import { writeText } from "@tauri-apps/api/clipboard";
-import { invoke } from "@tauri-apps/api";
 
 // 获取文件
 export async function getLocalFileText(path: string): Promise<string> {
@@ -15,11 +15,9 @@ export async function openUrlInUserBrowser(url: string) {
 
 export async function copyInfo(data: { data: string; type: string }) {
   console.log(data);
-  if (data.type == "text") {
-    await writeText(data.data);
-  } else {
-    await invoke("copy_image", { image: data.data });
-  }
+  await (data.type === "text"
+    ? writeText(data.data)
+    : invoke("copy_image", { image: data.data }));
 }
 
 export async function getHasRefererImageBase64(
@@ -29,17 +27,15 @@ export async function getHasRefererImageBase64(
   console.log(url);
   console.log(referer);
   return await invoke<string>("request_refer_image", {
-    url: url,
+    url,
     refer: referer,
   });
 }
 
 export async function bootStartSetting(isBoot: boolean): Promise<boolean> {
-  if (isBoot) {
-    return await invoke<boolean>("set_auto_launch", { autoLaunch: true });
-  } else {
-    return await invoke<boolean>("set_auto_launch", { autoLaunch: false });
-  }
+  return await (isBoot
+    ? invoke<boolean>("set_auto_launch", { autoLaunch: true })
+    : invoke<boolean>("set_auto_launch", { autoLaunch: false }));
 }
 
 export async function getBootStartSetting(): Promise<boolean> {

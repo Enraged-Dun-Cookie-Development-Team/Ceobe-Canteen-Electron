@@ -103,9 +103,9 @@ export function getCookieList(
   cookie_id: string,
   update_cookie_id?: string,
 ): Promise<Response<Payload<CookieList>>> {
-  let query: Record<string, any> = {
+  const query: Record<string, any> = {
     datasource_comb_id: comb_id,
-    cookie_id: cookie_id,
+    cookie_id,
   };
 
   if (update_cookie_id) {
@@ -115,7 +115,7 @@ export function getCookieList(
   return requestClient.requestPayload<CookieList>({
     requestTarget: "ServeCDN",
     url: `/cdn/cookie/mainList/cookieList`,
-    query: query,
+    query,
     method: "GET",
   });
 }

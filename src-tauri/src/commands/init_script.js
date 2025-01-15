@@ -1,7 +1,7 @@
 const updater = () => {
-  let s = document.createElement("style");
+  const s = document.createElement("style");
   s.type = "text/css";
-  s.innerText = `
+  s.textContent = `
 #bili-header-container,
 #internationalHeader,
 .van-popover,
@@ -28,9 +28,9 @@ if (document.readyState === "complete") {
   updater();
 }
 
-document.onreadystatechange = (_ev) => {
+document.addEventListener("readystatechange", (_ev) => {
   console.log(document.readyState);
   if (document.readyState === "complete") {
     updater();
   }
-};
+});

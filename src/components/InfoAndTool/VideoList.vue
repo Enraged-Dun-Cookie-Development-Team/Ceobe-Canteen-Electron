@@ -1,3 +1,39 @@
+<script setup name="video" lang="ts">
+import { onMounted, reactive } from "vue";
+
+import { DateTime } from "luxon";
+
+import { getVideoList, VideoItem } from "@/api/resourceFetcher/videoList";
+
+import operate from "../../api/operations/operate";
+
+const videoInfo = reactive<{
+  list: VideoItem[];
+  getList: () => void;
+}>({
+  list: [],
+  getList() {
+    getVideoList().then((res) => {
+      // 快捷连接
+      videoInfo.list = res.data.data.filter(
+        (x) =>
+          DateTime.fromSQL(x.start_time, { zone: "Asia/Shanghai" }) <=
+            DateTime.local() &&
+          DateTime.fromSQL(x.over_time, { zone: "Asia/Shanghai" }) >=
+            DateTime.local(),
+      );
+    });
+  },
+});
+const openUrl = (url: string) => {
+  operate.openUrlInBrowser(url);
+};
+
+onMounted(() => {
+  videoInfo.getList();
+});
+</script>
+
 <template>
   <div class="video mt-2 d-flex flex-wrap justify-space-evenly">
     <v-card
@@ -28,37 +64,6 @@
     <i />
   </div>
 </template>
-
-<script setup name="video" lang="ts">
-import { onMounted, reactive } from "vue";
-import { getVideoList, VideoItem } from "@/api/resourceFetcher/videoList";
-import operate from "../../api/operations/operate";
-import {DateTime} from "luxon";
-
-const videoInfo = reactive<{
-  list: VideoItem[];
-  getList: () => void;
-}>({
-  list: [],
-  getList() {
-    getVideoList().then((res) => {
-      // 快捷连接
-      videoInfo.list = res.data.data.filter(
-        (x) =>
-          DateTime.fromSQL(x.start_time, {zone: "Asia/Shanghai"}) <= DateTime.local() &&
-          DateTime.fromSQL(x.over_time, {zone: "Asia/Shanghai"}) >= DateTime.local(),
-      );
-    });
-  },
-});
-const openUrl = (url: string) => {
-  operate.openUrlInBrowser(url);
-}
-
-onMounted(() => {
-  videoInfo.getList();
-});
-</script>
 
 <style rel="stylesheet/scss" lang="scss">
 .video {

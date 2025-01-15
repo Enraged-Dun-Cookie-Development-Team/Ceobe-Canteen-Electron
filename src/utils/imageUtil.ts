@@ -6,12 +6,12 @@ export function getImage(url: string): string {
 export function getImageFromBase64(base64String: string) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = function () {
+    img.addEventListener("load", function () {
       resolve(this);
-    };
-    img.onerror = function () {
+    });
+    img.addEventListener("error", function () {
       reject("Error loading image");
-    };
+    });
     img.src = base64String;
   });
 }

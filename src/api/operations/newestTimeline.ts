@@ -1,10 +1,5 @@
-import {
-  emit,
-  Event,
-  listen,
-  once,
-  UnlistenFn,
-} from "@tauri-apps/api/event";
+import { emit, Event, listen, UnlistenFn } from "@tauri-apps/api/event";
+
 import { Cookie, CookieList } from "../resourceFetcher/cookieList";
 
 export interface TimelineData extends CookieList {
@@ -30,9 +25,7 @@ class NewestTimeline {
     await emit("newest-timeline", data);
   }
 
-  async knowNeedTimeline(
-    callback: () => void,
-  ): Promise<UnlistenFn> {
+  async knowNeedTimeline(callback: () => void): Promise<UnlistenFn> {
     return await listen<void>("need-timeline", callback);
   }
 

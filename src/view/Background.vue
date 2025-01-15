@@ -1,9 +1,6 @@
-<template>
-  <div class="background"></div>
-</template>
-
 <script lang="ts" name="index" setup>
 import { onBeforeMount, onUnmounted } from "vue";
+
 import { BackgroundRunner } from "@/utils/backgroundUtil";
 
 let background: null | BackgroundRunner = null;
@@ -21,3 +18,7 @@ onUnmounted(() => {
   }
 });
 </script>
+
+<template>
+  <div class="background"></div>
+</template>

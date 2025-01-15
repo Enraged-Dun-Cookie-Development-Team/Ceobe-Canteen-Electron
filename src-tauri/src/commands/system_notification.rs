@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize, Serializer};
 
-use tauri::{command, AppHandle};
+use tauri::{command, AppHandle, Manager};
 use tracing::instrument;
 
 use url::Url;

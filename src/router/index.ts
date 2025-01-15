@@ -1,10 +1,11 @@
 import { createRouter, createWebHashHistory } from "vue-router";
+
+import Browser from "@/components/Browser.vue";
 import Navbar from "@/components/Navbar.vue";
-import Home from "@/view/home/Home.vue";
 import Background from "@/view/Background.vue";
 import Notification from "@/view/Notification.vue";
+import Home from "@/view/home/Home.vue";
 import InfoAndTool from "@/view/home/InfoAndTool.vue";
-import Browser from "@/components/Browser.vue";
 
 const routes = [
   {

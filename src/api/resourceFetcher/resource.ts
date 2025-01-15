@@ -54,7 +54,8 @@ export interface Resources {
 
 export function getResourceInfo(): Promise<Response<Payload<ResourceInfo>>> {
   return requestClient.requestPayload({
-    url: `/canteen/operate/resource/get`,
+    url: `/cdn/operate/resource/get`,
     method: "GET",
+    requestTarget: "ServeCDN",
   });
 }
